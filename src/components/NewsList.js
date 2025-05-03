@@ -1,35 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 
 const NewsList = ({ featuredNews, otherNews, favorites, addToFavorites, removeFromFavorites }) => {
   return (
     <div>
       {featuredNews && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="featured-news"
-        >
-          <h2>Важная новость</h2>
+        <div className="featured-news">
           <Link to={`/news/${featuredNews.index}`}>
             <img src={featuredNews.image} alt={featuredNews.title} />
-            <h3>{featuredNews.title}</h3>
-            <p>{featuredNews.description}</p>
+            <div className="important-label">Важная новость</div>
+            <div className="content-overlay">
+              <h2>{featuredNews.title}</h2>
+              <p>{featuredNews.description}</p>
+            </div>
           </Link>
-        </motion.div>
+        </div>
       )}
 
       <div className="news-list">
         {otherNews.map((item) => (
-          <motion.div
-            key={item.index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="news-item"
-          >
+          <div key={item.index} className="news-item">
             <Link to={`/news/${item.index}`}>
               <img src={item.image} alt={item.title} />
               <div className="news-item-content">
@@ -47,7 +37,7 @@ const NewsList = ({ featuredNews, otherNews, favorites, addToFavorites, removeFr
                 </button>
               </div>
             </Link>
-          </motion.div>
+          </div>
         ))}
       </div>
     </div>

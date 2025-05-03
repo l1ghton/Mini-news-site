@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'; // Замените Routes на Switch
 import NewsList from './components/NewsList';
 import NewsDetail from './components/NewsDetail';
 import Pagination from './components/Pagination';
@@ -11,10 +11,9 @@ function App() {
   const [category, setCategory] = useState('general');
   const [searchQuery, setSearchQuery] = useState('');
   const [language, setLanguage] = useState('ru');
-  const [theme, setTheme] = useState('dark');
   const [favorites, setFavorites] = useState([]);
   const NEWS_PER_PAGE = 6;
-  const API_KEY = process.env.REACT_APP_API_KEY;
+  const API_KEY = '7c306d51053439824bd52a894ba3558e';
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -61,29 +60,6 @@ function App() {
     localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-    document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
-  };
-
-  const notify = (title, body) => {
-    if (Notification.permission === 'granted') {
-      new Notification(title, { body });
-    } else if (Notification.permission !== 'denied') {
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-          new Notification(title, { body });
-        }
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (allNews.length > 0) {
-      notify(allNews[0].title, allNews[0].description);
-    }
-  }, [allNews]);
-
   const handleNext = () => {
     setCurrentPage(prev => (prev < totalPages ? prev + 1 : prev));
   };
@@ -96,34 +72,31 @@ function App() {
     <Router>
       <div className="App">
         <header>
-          <h1>Последние Новости</h1>
-          <div className="search">
-            <input
-              type="text"
-              placeholder="Поиск новостей..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button onClick={() => setSearchQuery('')}>Найти</button>
-          </div>
+          <Link to="/" className="logo">News</Link>
           <div className="filters">
-            <button onClick={() => setCategory('general')}>Общие</button>
-            <button onClick={() => setCategory('business')}>Бизнес</button>
-            <button onClick={() => setCategory('technology')}>Технологии</button>
-            <button onClick={() => setCategory('sports')}>Спорт</button>
-            <button onClick={() => setCategory('entertainment')}>Развлечения</button>
+            <div className="dropdown">
+              <button className="dropdown-button">Категории ▼</button>
+              <div className="dropdown-content">
+                <button onClick={() => setCategory('general')}>Общие</button>
+                <button onClick={() => setCategory('business')}>Бизнес</button>
+                <button onClick={() => setCategory('technology')}>Технологии</button>
+                <button onClick={() => setCategory('sports')}>Спорт</button>
+                <button onClick={() => setCategory('entertainment')}>Развлечения</button>
+              </div>
+            </div>
+            <div className="languages">
+              <button onClick={() => setLanguage('ru')}>RU</button>
+              <button onClick={() => setLanguage('en')}>EN</button>
+            </div>
+            <Link to="/favorites" className="favorites-link">Избранные</Link>
           </div>
-          <div>
-            <button onClick={() => setLanguage('ru')}>RU</button>
-            <button onClick={() => setLanguage('en')}>EN</button>
-          </div>
-          <button onClick={toggleTheme}>Переключить тему</button>
         </header>
         <main>
-          <Routes>
+          <Switch> {/* Замените Routes на Switch */}
             <Route
+              exact
               path="/"
-              element={
+              render={() => (
                 <>
                   <NewsList
                     featuredNews={allNews[0]}
@@ -142,14 +115,50 @@ function App() {
                     onPrev={handlePrev}
                   />
                 </>
-              }
+              )}
             />
-            <Route path="/news/:id" element={<NewsDetail allNews={allNews} />} />
-          </Routes>
+            <Route
+              path="/news/:id"
+              render={(props) => <NewsDetail {...props} allNews={allNews} />}
+            />
+            <Route
+              path="/favorites"
+              render={() => (
+                <FavoritesList
+                  favorites={favorites}
+                  removeFromFavorites={removeFromFavorites}
+                />
+              )}
+            />
+          </Switch>
         </main>
       </div>
     </Router>
   );
 }
+
+const FavoritesList = ({ favorites, removeFromFavorites }) => {
+  return (
+    <div className="favorites-page">
+      <h2>Избранные новости</h2>
+      {favorites.length === 0 ? (
+        <p>У вас нет избранных новостей.</p>
+      ) : (
+        <div className="news-list">
+          {favorites.map((item) => (
+            <div key={item.index} className="news-item">
+              <img src={item.image} alt={item.title} />
+              <div className="news-item-content">
+                <h3>{item.title}</h3>
+                <p>{item.description || 'Нет описания'}</p>
+                <button onClick={() => removeFromFavorites(item.index)}>Удалить</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default App;
