@@ -539,3 +539,12 @@ body::before {
 .rain-map {
   margin-top: 2rem;
 }
+.weather-page p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.weather-page p.error {
+  color: red;
+  font-weight: bold;
+}

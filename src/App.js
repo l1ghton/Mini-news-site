@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'; // Используем Switch вместо Routes
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import NewsList from './components/NewsList';
 import NewsDetail from './components/NewsDetail';
 import Pagination from './components/Pagination';
@@ -15,6 +15,7 @@ function App() {
   const [favorites, setFavorites] = useState([]);
   const [weatherData, setWeatherData] = useState(null);
   const [city, setCity] = useState('Moscow'); // Текущий город
+  const [error, setError] = useState(''); // Состояние для ошибки
   const NEWS_PER_PAGE = 6;
   const API_KEY_WEATHER = 'bdf594d756229792419ff336375e32bf';
   const API_KEY_NEWS = '7c306d51053439824bd52a894ba3558e';
@@ -24,9 +25,9 @@ function App() {
       try {
         let url = '';
         if (searchQuery) {
-          url = `https://gnews.io/api/v4/search?q=${searchQuery}&lang=${language}&apikey=${API_KEY_NEWS}`;
+          url = `https://gnews.io/api/v4/search?q= ${searchQuery}&lang=${language}&apikey=${API_KEY_NEWS}`;
         } else {
-          url = `https://gnews.io/api/v4/top-headlines?lang=${language}&country=ru&category=${category}&apikey=${API_KEY_NEWS}`;
+          url = `https://gnews.io/api/v4/top-headlines?lang= ${language}&country=ru&category=${category}&apikey=${API_KEY_NEWS}`;
         }
 
         const response = await fetch(url);
@@ -56,12 +57,19 @@ function App() {
     const fetchWeather = async () => {
       try {
         const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY_WEATHER}&units=metric`
+          `https://api.openweathermap.org/data/2.5/weather?q= ${city}&appid=${API_KEY_WEATHER}&units=metric`
         );
+
+        if (!response.ok) {
+          throw new Error('Город не найден.');
+        }
+
         const data = await response.json();
         setWeatherData(data);
+        setError(''); // Очистить ошибку, если город найден
       } catch (error) {
-        console.error('Ошибка загрузки погоды:', error);
+        setError(error.message); // Установить сообщение об ошибке
+        setWeatherData(null); // Очистить данные о погоде
       }
     };
 
@@ -75,7 +83,7 @@ function App() {
         const { latitude, longitude } = position.coords;
         try {
           const response = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY_WEATHER}&units=metric`
+            `https://api.openweathermap.org/data/2.5/weather?lat= ${latitude}&lon=${longitude}&appid=${API_KEY_WEATHER}&units=metric`
           );
           const data = await response.json();
           setCity(data.name); // Устанавливаем город из геолокации
@@ -133,7 +141,7 @@ function App() {
           </div>
         </header>
         <main>
-          <Switch> {/* Используем Switch вместо Routes */}
+          <Switch>
             <Route
               exact
               path="/"
@@ -173,7 +181,7 @@ function App() {
             />
             <Route
               path="/weather"
-              render={() => <WeatherPage city={city} setCity={setCity} weatherData={weatherData} />}
+              render={() => <WeatherPage city={city} setCity={setCity} weatherData={weatherData} error={error} />}
             />
           </Switch>
         </main>

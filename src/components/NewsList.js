@@ -8,11 +8,11 @@ const NewsList = ({ featuredNews, otherNews, favorites, addToFavorites, removeFr
         <div className="featured-news">
           <Link to={`/news/${featuredNews.index}`}>
             <img src={featuredNews.image} alt={featuredNews.title} />
-            <div className="important-label">Важная новость</div>
             <div className="content-overlay">
               <h2>{featuredNews.title}</h2>
               <p>{featuredNews.description}</p>
             </div>
+            <div className="important-label">Важная новость</div>
           </Link>
         </div>
       )}
